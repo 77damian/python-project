@@ -8,7 +8,7 @@ class Camera:
         self.world_width, self.world_height = WORLD_WIDTH, WORLD_HEIGHT
         self.x, self.y = WORLD_WIDTH / 2, WORLD_HEIGHT/ 2
         self.zoom = 1.0
-        self.min_zoom, self.max_zoom = 0.5, 3.0
+        self.min_zoom, self.max_zoom = 0.8, 2.0
 
     def clamp(self):
         view_height, view_width = self.screen_height / self.zoom, self.screen_width / self.zoom
