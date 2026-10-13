@@ -2,7 +2,7 @@ import pygame
 
 from constants import *
 
-map = [
+board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
     [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
@@ -46,12 +46,82 @@ map = [
 
 ]
 
+class Tile:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
 class Map:
-    def __init__(self, screen):
+    def __init__(self, screen, camera):
         self.screen = screen
+        self.camera = camera
+        self.board = board
+        self.mouse_pos = None
+
+    # def load_map_board(self, board):
+    #     self.board = board
 
     def draw(self):
-        pass
+        for y in range(len(self.board)):
+            for x in range(len(self.board[0])):
 
-    def update(self):
-        pass
+                if self.board[y][x] == 0:
+                    color = "cyan"
+                else:
+                    color = "green"
+
+                tile_rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                screen_rect = self.camera.world_rect_to_screen(tile_rect)
+                if self.mouse_pos and screen_rect.collidepoint(self.mouse_pos):
+                    color = "red"
+
+                pygame.draw.rect(self.screen, color, screen_rect)
+
+    def draw_grid(self):
+        grid_size = 32
+
+        # 1. Calculate what part of the world is currently visible on screen
+        half_view_w = (SCREEN_WIDTH / 2) / self.camera.zoom
+        half_view_h = (SCREEN_HEIGHT / 2) / self.camera.zoom
+
+        min_wx = self.camera.x - half_view_w
+        max_wx = self.camera.x + half_view_w
+        min_wy = self.camera.y - half_view_h
+        max_wy = self.camera.y + half_view_h
+
+        # 2. Snap bounds to the nearest grid lines
+        start_x = int(min_wx // grid_size) * grid_size
+        end_x = int(max_wx // grid_size + 1) * grid_size
+        start_y = int(min_wy // grid_size) * grid_size
+        end_y = int(max_wy // grid_size + 1) * grid_size
+
+        # 3. Draw only the vertical lines inside the viewport
+        for x in range(start_x, end_x + grid_size, grid_size):
+            sx1, sy1 = self.camera.world_to_screen(x, min_wy)
+            sx2, sy2 = self.camera.world_to_screen(x, max_wy)
+
+            pygame.draw.line(
+                self.screen,
+                (80, 140, 80),
+                (round(sx1), round(sy1)),  # round() prevents sub-pixel thickness jitter
+                (round(sx2), round(sy2)),
+                1
+            )
+
+        # 4. Draw only the horizontal lines inside the viewport
+        for y in range(start_y, end_y + grid_size, grid_size):
+            sx1, sy1 = self.camera.world_to_screen(min_wx, y)
+            sx2, sy2 = self.camera.world_to_screen(max_wx, y)
+
+            pygame.draw.line(
+                self.screen,
+                (80, 140, 80),
+                (round(sx1), round(sy1)),
+                (round(sx2), round(sy2)),
+                1
+            )
+
+    def update(self, mouse_pos):
+        self.mouse_pos = mouse_pos
+
