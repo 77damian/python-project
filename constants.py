@@ -10,6 +10,12 @@ WORLD_WIDTH = 1984 # x32
 WORLD_HEIGHT = 1280 # x32
 
 
+TERRAIN_COLORS = {"W": "cyan", "G": "green"}
+BUILDABLE_TERRAIN = {"G"}
 
+TOWER_TYPES = {
+    "C": {"color": "saddlebrown", "max_level": 3},  # cannon
+    "M": {"color": "gold", "max_level": 1},  # mine
+}
 
 TILE_SIZE = 32
