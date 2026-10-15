@@ -1,8 +1,5 @@
 # Format of each tile: <terrain>[<tower><level>] where [] is optional
-# Terrain: W = water, G = ground
-# Tower: C = cannon, M = mine (only on buildable terrain)
-# Level: 1-max depending on the tower
-# Examples: W (water), G (empty ground), GM1 (level 1 mine on ground), GC3 (level 3 cannon on ground)
+# Terrain: W = water, G = grass
 
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
