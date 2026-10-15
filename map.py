@@ -22,6 +22,7 @@ class Map:
         self.board = self.load_map(path)
         self.mouse_pos = None
 
+    # loads map from file to cache
     @classmethod
     def load_map(cls, path):
         path = Path(__file__).parent / path
@@ -30,6 +31,7 @@ class Map:
                 cls._cache[path] = cls.parse_map(f.read(), path.name)
         return cls._cache[path]
 
+    # builds the tile grid (board[y][x]) from map text
     @staticmethod
     def parse_map(text, name="<map>"):
         board = []
