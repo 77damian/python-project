@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 
 import pygame
@@ -6,33 +5,12 @@ import pygame
 from constants import *
 
 
-TILE_TOKEN = re.compile(r"([A-Z])(?:([A-Z])(\d+))?")
-
-
 class Tile:
-    def __init__(self, x, y, terrain, tower=None, tower_level=0):
+    def __init__(self, x, y, terrain):
         self.x = x
         self.y = y
         self.terrain = terrain
-        self.tower = tower
-        self.tower_level = tower_level
         self.rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-
-    # max level of the tower on this tile (0 if none)
-    @property
-    def max_tower_level(self):
-        return TOWER_TYPES[self.tower]["max_level"] if self.tower else 0
-
-    # a max_level 1 tower is never upgradable
-    def can_upgrade(self):
-        return self.tower is not None and self.tower_level < self.max_tower_level
-
-    # returns True if the tower was upgraded
-    def upgrade(self):
-        if not self.can_upgrade():
-            return False
-        self.tower_level += 1
-        return True
 
 
 class Map:
@@ -43,7 +21,6 @@ class Map:
         self.camera = camera
         self.board = self.load_map(path)
         self.mouse_pos = None
-        self.board = self.load_map(path)
 
     # loads map from file to cache
     @classmethod
@@ -67,30 +44,9 @@ class Map:
 
             row = []
             for x, token in enumerate(line.split()):
-                where = f"{name}:{line_no}, tile {x + 1} ('{token}')"
-                match = TILE_TOKEN.fullmatch(token)
-                if not match:
-                    raise ValueError(f"{where}: invalid tile, expected <terrain>[<tower><level>]")
-
-                # validate terrain and tower
-                terrain, tower, level = match.groups()
-                if terrain not in TERRAIN_COLORS:
-                    raise ValueError(f"{where}: unknown terrain '{terrain}'")
-
-                if tower is None:
-                    tower_level = 0
-                else:
-                    if tower not in TOWER_TYPES:
-                        raise ValueError(f"{where}: unknown tower '{tower}'")
-                    if terrain not in BUILDABLE_TERRAIN:
-                        raise ValueError(f"{where}: can't build a tower on terrain '{terrain}'")
-                    tower_level = int(level)
-                    max_level = TOWER_TYPES[tower]["max_level"]
-                    if not 1 <= tower_level <= max_level:
-                        raise ValueError(f"{where}: tower '{tower}' level must be 1-{max_level}")
-
-                tile = Tile(x, len(board), terrain, tower, tower_level)
-                row.append(tile)
+                if token not in TERRAIN_COLORS:
+                    raise ValueError(f"{name}:{line_no}, tile {x + 1} ('{token}'): unknown terrain")
+                row.append(Tile(x, len(board), token))
 
             # all rows must be the same length
             if board and len(row) != len(board[0]):
@@ -101,72 +57,12 @@ class Map:
             raise ValueError(f"{name}: map is empty")
         return board
 
-    # draws terrain and towers
+    # draws terrain
     def draw(self):
         for row in self.board:
             for tile in row:
                 screen_rect = self.camera.world_rect_to_screen(tile.rect)
-
                 pygame.draw.rect(self.screen, TERRAIN_COLORS[tile.terrain], screen_rect)
-
-                if tile.tower:
-                    tower_rect = screen_rect.inflate(-screen_rect.width // 2, -screen_rect.height // 2)
-                    pygame.draw.rect(self.screen, TOWER_TYPES[tile.tower]["color"], tower_rect)
-
-    @classmethod
-    def load_map(cls, path):
-        path = Path(__file__).parent / path
-        if path not in cls._cache:
-            with open(path, encoding="utf-8") as f:
-                cls._cache[path] = cls.parse_map(f.read(), path.name)
-        return cls._cache[path]
-
-    @staticmethod
-    def parse_map(text, name="<map>"):
-        board = []
-
-        for line_no, line in enumerate(text.splitlines(), start=1):
-            line = line.strip()
-            # skip blank lines and comments
-            if not line or line.startswith("#"):
-                continue
-
-            row = []
-            for x, token in enumerate(line.split()):
-                where = f"{name}:{line_no}, tile {x + 1} ('{token}')"
-                match = TILE_TOKEN.fullmatch(token)
-                if not match:
-                    raise ValueError(f"{where}: invalid tile, expected <terrain>[<tower><level>]")
-
-                # validate terrain and tower
-                terrain, tower, level = match.groups()
-                if terrain not in TERRAIN_COLORS:
-                    raise ValueError(f"{where}: unknown terrain '{terrain}'")
-
-                if tower is None:
-                    tower_level = 0
-                else:
-                    if tower not in TOWER_TYPES:
-                        raise ValueError(f"{where}: unknown tower '{tower}'")
-                    if terrain not in BUILDABLE_TERRAIN:
-                        raise ValueError(f"{where}: can't build a tower on terrain '{terrain}'")
-                    tower_level = int(level)
-                    max_level = TOWER_TYPES[tower]["max_level"]
-                    if not 1 <= tower_level <= max_level:
-                        raise ValueError(f"{where}: tower '{tower}' level must be 1-{max_level}")
-
-                tile = Tile(x, len(board), terrain, tower, tower_level)
-                row.append(tile)
-
-            # all rows must be the same length
-            if board and len(row) != len(board[0]):
-                raise ValueError(f"{name}:{line_no}: row has {len(row)} tiles, expected {len(board[0])}")
-            board.append(row)
-
-        if not board:
-            raise ValueError(f"{name}: map is empty")
-        return board
-
 
     def draw_grid(self):
         grid_size = 32
