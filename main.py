@@ -15,7 +15,7 @@ camera = Camera()
 
 map_manager = Map(screen, camera)
 
-while True:
+while True: 
     dt = clock.tick(60) / 1000.0
     screen.fill("black")
     for event in pygame.event.get():
