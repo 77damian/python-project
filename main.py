@@ -13,6 +13,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 camera = Camera()
 
+map_manager = Map(screen, camera)
 
 while True:
     dt = clock.tick(60) / 1000.0
@@ -28,7 +29,6 @@ while True:
 
     camera_speed = CAMERA_SPEED * dt / camera.zoom
 
-    map_manager = Map(screen, camera)
 
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         camera.move(-camera_speed, 0)
