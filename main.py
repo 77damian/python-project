@@ -18,7 +18,7 @@ enemies = pygame.sprite.Group()
 spawn_timer = 0.0
 
 
-while True:
+while True: 
     dt = clock.tick(60) / 1000.0
     screen.fill("black")
     for event in pygame.event.get():
@@ -32,7 +32,6 @@ while True:
 
     camera_speed = CAMERA_SPEED * dt / camera.zoom
 
-    map_manager = Map(screen, camera)
 
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         camera.move(-camera_speed, 0)
