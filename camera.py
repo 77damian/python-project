@@ -56,6 +56,11 @@ class Camera:
             rect.height * self.zoom
         )
 
+    def screen_to_world(self, screen_x, screen_y):
+        world_x = self.x + (screen_x - SCREEN_WIDTH / 2) / self.zoom
+        world_y = self.y + (screen_y - SCREEN_HEIGHT / 2) / self.zoom
+        return world_x, world_y
+
 
 
 

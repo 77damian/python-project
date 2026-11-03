@@ -6,6 +6,7 @@ from constants import *
 from camera import Camera
 from map import Map
 from enemies import Enemy, random_edge_position
+from building.building_manager import BuildingManager
 
 pygame.init()
 
@@ -17,8 +18,10 @@ camera = Camera()
 enemies = pygame.sprite.Group()
 spawn_timer = 0.0
 
+map_manager = Map(screen, camera)
+build_manager = BuildingManager(screen, camera)
 
-while True: 
+while True:
     dt = clock.tick(60) / 1000.0
     screen.fill("black")
     for event in pygame.event.get():
@@ -45,6 +48,8 @@ while True:
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
         camera.move(0, camera_speed)
 
+    build_manager.handle_keys(keys)
+
     spawn_timer += dt
     if spawn_timer >= ENEMY_SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
         spawn_timer = 0.0
@@ -54,7 +59,11 @@ while True:
 
     map_manager.update(pygame.mouse.get_pos())
     enemies.update(dt)
+    build_manager.update(dt, pygame.mouse.get_pos())
     map_manager.draw()
+    build_manager.draw()
+
+
     for enemy in enemies:
         enemy.draw(screen, camera)
     if keys[pygame.K_x]:
