@@ -48,7 +48,6 @@ class BuildingManager:
 
         if mouse_pressed and not self.mouse_clicked and self.selected_building:
             self.buildings.add(self.selected_building)
-            # Spawn a new preview building to keep placing more
             self.selected_building = Building(-1000, -1000)
 
         self.mouse_clicked = mouse_pressed

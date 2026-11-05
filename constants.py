@@ -22,6 +22,6 @@ MAX_ENEMIES = 30
 # Buildings (TEMPORARY)
 
 BUILDING_DICTIONARY = {
-    1: {"color": "grey", "size": 10, "type": "wall"},
-    2: {"color": "red", "size": 20, "type": "tower"},
+    1: {"color": "grey", "type": "wall"},
+    2: {"color": "red", "type": "tower"},
 }

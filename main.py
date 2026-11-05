@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from building.building import Building, Crystal
 from constants import *
 from camera import Camera
 from map import Map
