@@ -1,8 +1,8 @@
 import pygame
 
 from constants import *
-
 from .building import Building
+
 
 class BuildingManager:
     def __init__(self, screen, camera):
@@ -23,14 +23,12 @@ class BuildingManager:
             # 1. Convert screen mouse position to world coordinates
             world_x, world_y = self.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
 
-            # 2. Snap coordinates to the grid (optional, but recommended for tile games)
+            # 2. Snap coordinates to the grid
             grid_x = (world_x // TILE_SIZE) * TILE_SIZE
             grid_y = (world_y // TILE_SIZE) * TILE_SIZE
 
             # 3. Move only the preview building
             self.selected_building.change_location(grid_x, grid_y)
-
-
 
     def draw(self):
         for building in self.buildings:
@@ -51,5 +49,3 @@ class BuildingManager:
             self.selected_building = Building(-1000, -1000)
 
         self.mouse_clicked = mouse_pressed
-
-
