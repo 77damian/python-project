@@ -14,10 +14,14 @@ TERRAIN_COLORS = {"W": "cyan", "G": "green"}
 
 TILE_SIZE = 32
 
-TARGET_POS = (WORLD_WIDTH / 2, WORLD_HEIGHT / 2)  # enemies head here
+CRYSTAL_TOKEN = "C"
+CRYSTAL_HEALTH = 1000
 
 ENEMY_SPAWN_INTERVAL = 2.5  # seconds
 MAX_ENEMIES = 30
+
+# world px; enemy counts as "in range" when it is this close to its attack range
+RANGE_TOLERANCE = 0.5
 
 # Buildings (TEMPORARY)
 

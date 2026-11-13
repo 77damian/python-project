@@ -37,12 +37,21 @@ class Building(pygame.sprite.Sprite):
     def take_damage(self, amount):
         self.health -= amount
 
+    # distance from a world point to the nearest edge of the building (0 if inside)
+    def distance_to(self, point):
+        closest = (
+            max(self.rect.left, min(point.x, self.rect.right)),
+            max(self.rect.top, min(point.y, self.rect.bottom)),
+        )
+        return point.distance_to(closest)
+
 
 
 
 class Crystal(Building):
     def __init__(self, world_x, world_y):
         super().__init__(world_x, world_y)
+        self.health = CRYSTAL_HEALTH
         self.building_size = 2
         self.x, self.y = self.world_x*TILE_SIZE, self.world_y*TILE_SIZE
         self.rect = pygame.Rect(self.x, self.y, TILE_SIZE*self.building_size, TILE_SIZE*self.building_size)

@@ -1,5 +1,6 @@
-# Format of each tile: <terrain>[<tower><level>] where [] is optional
+# Format of each tile: <terrain>[<structure>[<level>]] where [] is optional
 # Terrain: W = water, G = grass
+# Structures: C = main crystal (marks the top-left tile of its 2x2 footprint)
 
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
@@ -32,7 +33,7 @@ W W W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G 
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
-W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
+W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G GC G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W
 W W W W W W W W W W W W W W W W W W W W W W W W W W W W G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W

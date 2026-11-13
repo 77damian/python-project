@@ -6,10 +6,11 @@ from constants import *
 
 
 class Tile:
-    def __init__(self, x, y, terrain):
+    def __init__(self, x, y, terrain, structure=None):
         self.x = x
         self.y = y
         self.terrain = terrain
+        self.structure = structure
         self.rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
 
@@ -20,6 +21,7 @@ class Map:
         self.screen = screen
         self.camera = camera
         self.board = self.load_map(path)
+        self.crystal_tile = self.find_crystal()
         self.mouse_pos = None
 
     # loads map from file to cache
@@ -44,9 +46,12 @@ class Map:
 
             row = []
             for x, token in enumerate(line.split()):
-                if token not in TERRAIN_COLORS:
+                terrain, structure = token[0], token[1:] or None
+                if terrain not in TERRAIN_COLORS:
                     raise ValueError(f"{name}:{line_no}, tile {x + 1} ('{token}'): unknown terrain")
-                row.append(Tile(x, len(board), token))
+                if structure not in (None, CRYSTAL_TOKEN):
+                    raise ValueError(f"{name}:{line_no}, tile {x + 1} ('{token}'): unknown structure")
+                row.append(Tile(x, len(board), terrain, structure))
 
             # all rows must be the same length
             if board and len(row) != len(board[0]):
@@ -56,6 +61,13 @@ class Map:
         if not board:
             raise ValueError(f"{name}: map is empty")
         return board
+
+    # the tile holding the top-left corner of the main crystal
+    def find_crystal(self):
+        crystals = [tile for row in self.board for tile in row if tile.structure == CRYSTAL_TOKEN]
+        if len(crystals) != 1:
+            raise ValueError(f"map must contain exactly one crystal, found {len(crystals)}")
+        return crystals[0]
 
     # draws terrain
     def draw(self):
