@@ -1,5 +1,3 @@
-
-
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
@@ -8,7 +6,6 @@ ZOOM_SPEED = 0.25
 
 WORLD_WIDTH = 3200 # x32
 WORLD_HEIGHT = 2048 # x32
-
 
 TERRAIN_COLORS = {"W": "cyan", "G": "green"}
 
@@ -24,8 +21,41 @@ MAX_ENEMIES = 30
 RANGE_TOLERANCE = 0.5
 
 # Buildings (TEMPORARY)
-
-BUILDING_DICTIONARY = {
-    1: {"color": "grey", "type": "wall"},
-    2: {"color": "red", "type": "tower"},
+TOWER_BASE_IMAGES = {
+    1: "assets/towers/base/towerBaseLvl1.png",
+    2: "assets/towers/base/towerBaseLvl2.png",
+    3: "assets/towers/base/towerBaseLvl3.png",
+    4: "assets/towers/base/towerBaseLvl4.png",
 }
+
+TOWER_HEAD_IMAGES = {
+    "default": "assets/towers/head/towerHeadDefault.png",
+    "area": "assets/towers/head/towerHeadArea.png",
+    "long": "assets/towers/head/towerHeadLong.png",
+}
+
+# Ścieżki do grafik pocisków
+BULLET_IMAGES = {
+    "default": "assets/bullets/bulletDefault.png",
+    "rocket_small": "assets/bullets/bulletRocketRangeSmall.png",
+    "rocket_big": "assets/bullets/bulletRocketRangeBig.png",
+}
+
+TOWERS_DATA = {
+    1: {
+        "name": "BaseTower",
+        "head": "default",
+        "head_img": TOWER_HEAD_IMAGES["default"],
+        "bullet_img": BULLET_IMAGES["default"],
+        "damage": 10,
+        "range": 150,
+        "fire_rate": 1.0,
+        "bullet_speed": 300,
+        "cost": 50,
+    },
+}
+
+# BUILDING_DICTIONARY = {
+#     1: {"color": "grey", "type": "wall"},
+#     2: {"color": "red", "type": "tower"},
+# }
