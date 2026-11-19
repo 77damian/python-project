@@ -18,6 +18,8 @@ class Enemy(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(x, y)  # position in world space
         self.target = None
         self.cooldown_left = 0.0
+        self.radius = 12
+        self.health = 100
 
         # placeholder graphics
         size = self.radius * 2
@@ -27,6 +29,14 @@ class Enemy(pygame.sprite.Sprite):
 
     def set_target(self, building):
         self.target = building
+
+    def distance_to(self, pos):
+        return self.pos.distance_to(pos)
+
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health <= 0:
+            self.kill()
 
     def update(self, dt, bullets):
         self.cooldown_left = max(0.0, self.cooldown_left - dt)
@@ -56,6 +66,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class Warrior(Enemy):
+    health = 100
     color = "red"
     radius = 12
     damage = 10
@@ -66,6 +77,7 @@ class Warrior(Enemy):
 
 
 class Tank(Enemy):
+    health = 200
     color = "navy"
     radius = 24
     damage = 40
@@ -76,6 +88,7 @@ class Tank(Enemy):
 
 
 class Archer(Enemy):
+    health = 80
     color = "yellow"
     radius = 10
     damage = 6

@@ -14,7 +14,7 @@ class Building(pygame.sprite.Sprite):
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
         self.image.fill((255, 0, 0, 150))
 
-    def update(self, dt):
+    def update(self, dt, enemies=None, bullets=None):
         if self.health <= 0:
             self.kill()
 

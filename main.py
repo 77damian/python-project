@@ -88,7 +88,7 @@ while True:
         if not is_paused:
             # Check if building selected via UI
             if game_state.get("selected_building") is not None:
-                build_manager.selected_building = Building(-1000, -1000)
+                build_manager.select_building(game_state["selected_building"])
                 game_state["selected_building"] = None
 
             keys = pygame.key.get_pressed()
@@ -103,20 +103,22 @@ while True:
             if keys[pygame.K_s] or keys[pygame.K_DOWN]:
                 camera.move(0, camera_speed)
 
+            build_manager.handle_keys(keys)
+
+            spawn_timer += dt
+            if spawn_timer >= ENEMY_SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
+                spawn_timer = 0.0
+                enemies.add(spawn_enemy(crystal))
+
+            map_manager.update(pygame.mouse.get_pos())
+            enemies.update(dt, bullets)
+            bullets.update(dt)
+            build_manager.update(dt, pygame.mouse.get_pos(), enemies, bullets)
+
         # --- Draw game world ---
         screen.fill("black")
         map_manager.draw()
         build_manager.draw()
-
-        spawn_timer += dt
-        if spawn_timer >= ENEMY_SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
-            spawn_timer = 0.0
-            enemies.add(spawn_enemy(crystal))
-
-        map_manager.update(pygame.mouse.get_pos())
-        enemies.update(dt, bullets)
-        bullets.update(dt)
-        build_manager.update(dt, pygame.mouse.get_pos())
 
         for enemy in enemies:
             enemy.draw(screen, camera)
@@ -124,11 +126,9 @@ while True:
             bullet.draw(screen, camera)
         if not is_paused:
             keys = pygame.key.get_pressed()
-            build_manager.handle_keys(keys)
             if keys[pygame.K_x]:
                 map_manager.draw_grid()
         else:
-            # Semi-transparent dark overlay over world when paused
             dim = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             dim.fill((0, 0, 0, 140))
             screen.blit(dim, (0, 0))

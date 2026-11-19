@@ -2,22 +2,35 @@ import pygame
 
 from constants import *
 from .building import Building
+from towers.towers import BaseTower, LongTower
 
 
 class BuildingManager:
+    BUILDING_TYPES = {
+        1: BaseTower,
+        2: LongTower,
+    }
+
     def __init__(self, screen, camera):
         self.buildings = pygame.sprite.Group()
 
         self.selected_building = None
+        self.selected_building_id = None
         self.screen = screen
         self.camera = camera
         self.mouse_clicked = False
 
+    def select_building(self, building_id):
+        building_cls = self.BUILDING_TYPES.get(building_id)
+        if building_cls is not None:
+            self.selected_building_id = building_id
+            self.selected_building = building_cls(-1000, -1000)
+
     def add_building(self, building):
         self.buildings.add(building)
 
-    def update(self, dt, mouse_pos):
-        self.buildings.update(dt)
+    def update(self, dt, mouse_pos, enemies=None, bullets=None):
+        self.buildings.update(dt, enemies, bullets)
 
         if self.selected_building:
             # 1. Convert screen mouse position to world coordinates
@@ -38,14 +51,14 @@ class BuildingManager:
 
     def handle_keys(self, keys):
         if keys[pygame.K_1]:
-            self.selected_building = Building(-1000, -1000)
+            self.select_building(1)
         if keys[pygame.K_2]:
-            self.selected_building = Building(-1000, -1000)
+            self.select_building(2)
 
         mouse_pressed = pygame.mouse.get_pressed()[0]
 
         if mouse_pressed and not self.mouse_clicked and self.selected_building:
             self.buildings.add(self.selected_building)
-            self.selected_building = Building(-1000, -1000)
+            self.select_building(self.selected_building_id)
 
         self.mouse_clicked = mouse_pressed
