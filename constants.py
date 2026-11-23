@@ -107,11 +107,6 @@ TOWERS_DATA = {
         },
 }
 
-# BUILDING_DICTIONARY = {
-#     1: {"color": "grey", "type": "wall"},
-#     2: {"color": "red", "type": "tower"},
-# }
-
 
 
 

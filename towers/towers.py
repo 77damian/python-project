@@ -209,9 +209,6 @@ class BaseTower(Tower):
         self._draw_tower(screen, camera)
 
 
-
-
-
 class LongTower(Tower):
     ID = 2
 
