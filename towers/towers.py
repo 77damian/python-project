@@ -2,7 +2,7 @@ import math
 import pygame
 
 from building.building import Building
-from bullet import Bullet
+from bullet import Bullet, RocketBullet
 from constants import *
 
 
@@ -25,6 +25,7 @@ class Tower(Building):
         self.aim_tolerance = data["aim_tolerance"]
         self.barrel_length = data["barrel_length"]
         self.cost = data["cost"]
+        self.splash_radius = data["splash_radius"]
 
         self.base_img = self._load_image(TOWER_BASE_IMAGES[self.level])
         self.head_img = self._load_image(data["head_img"])
@@ -93,7 +94,7 @@ class Tower(Building):
         self.angle = (self.angle + 180.0) % 360.0 - 180.0
         return abs((desired_angle - self.angle + 180.0) % 360.0 - 180.0)
 
-    def shoot(self, target, bullets):
+    def shoot(self, target, enemies, bullets):
         bullet = Bullet(
             pos=self.rect.center,
             target=target,
@@ -121,11 +122,81 @@ class Tower(Building):
         angle_error = self.rotate_towards(target.pos, dt)
 
         if angle_error <= self.aim_tolerance and self.shoot_timer <= 0.0:
-            self.shoot(target, bullets)
+            self.shoot(target, enemies, bullets)
             self.shoot_timer = 1.0 / self.fire_rate
 
     def draw(self, screen, camera):
         pass
+
+    def _blit_rotated_part(
+            self, screen, camera, image, world_center, screen_scale_x, screen_scale_y, alpha=255, tint=None
+    ):
+        size = (
+            max(1, round(image.get_width() * screen_scale_x)),
+            max(1, round(image.get_height() * screen_scale_y)),
+        )
+        scaled = pygame.transform.scale(image, size)
+        if tint is not None:
+            scaled.fill((*tint, alpha), special_flags=pygame.BLEND_RGBA_MULT)
+        elif alpha < 255:
+            scaled.set_alpha(alpha)
+
+        rotated = pygame.transform.rotate(scaled, self.angle + SPRITE_ANGLE_OFFSET)
+        screen_center = camera.world_to_screen(world_center[0], world_center[1])
+        rect = rotated.get_rect(center=(round(screen_center[0]), round(screen_center[1])))
+        screen.blit(rotated, rect)
+
+    def _draw_circle_effect(self, screen, camera, world_radius, fill_rgba, border_rgba, border_width=2):
+        screen_radius = max(1, round(world_radius * camera.zoom))
+        diameter = screen_radius * 2
+        surface = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+
+        pygame.draw.circle(surface, fill_rgba, (screen_radius, screen_radius), screen_radius)
+        pygame.draw.circle(surface, border_rgba, (screen_radius, screen_radius), screen_radius, border_width)
+
+        center = camera.world_to_screen(self.rect.centerx, self.rect.centery)
+        rect = surface.get_rect(center=(round(center[0]), round(center[1])))
+        screen.blit(surface, rect)
+
+    def draw_preview(self, screen, camera, can_place=True):
+        screen_rect = camera.world_rect_to_screen(self.rect)
+        scale_x = screen_rect.width / self.base_img.get_width()
+        scale_y = screen_rect.height / self.base_img.get_height()
+        tint = None if can_place else (255, 70, 70)
+
+        preview_base = pygame.transform.scale(self.base_img, screen_rect.size)
+        if tint is not None:
+            preview_base.fill((*tint, 160), special_flags=pygame.BLEND_RGBA_MULT)
+        else:
+            preview_base.set_alpha(150)
+        screen.blit(preview_base, screen_rect)
+
+        ring_color = (100, 200, 255) if can_place else (255, 70, 70)
+        self._draw_circle_effect(
+            screen,
+            camera,
+            world_radius=self.range,
+            fill_rgba=(*ring_color, 35),
+            border_rgba=(*ring_color, 130),
+            border_width=1,
+        )
+
+        self._blit_rotated_part(
+            screen, camera, self.head_img, self.rect.center, scale_x, scale_y, alpha=160, tint=tint
+        )
+
+    def _draw_tower(self, screen, camera):
+        screen_rect = camera.world_rect_to_screen(self.rect)
+        scale_x = screen_rect.width / self.base_img.get_width()
+        scale_y = screen_rect.height / self.base_img.get_height()
+
+        scaled_base = pygame.transform.scale(self.base_img, screen_rect.size)
+        screen.blit(scaled_base, screen_rect)
+
+        if self.muzzle_flash_timer > 0.0:
+            self._blit_rotated_part(screen, camera, self.fire_img, self.get_muzzle_pos(), scale_x, scale_y)
+
+        self._blit_rotated_part(screen, camera, self.head_img, self.rect.center, scale_x, scale_y)
 
 
 class BaseTower(Tower):
@@ -134,46 +205,11 @@ class BaseTower(Tower):
     def __init__(self, world_x, world_y):
         super().__init__(world_x, world_y, tower_id=self.ID)
 
-    def _blit_rotated_part(self, screen, camera, image, world_center, screen_scale_x, screen_scale_y, alpha=255):
-        size = (
-            max(1, round(image.get_width() * screen_scale_x)),
-            max(1, round(image.get_height() * screen_scale_y)),
-        )
-        scaled = pygame.transform.scale(image, size)
-        if alpha < 255:
-            scaled.set_alpha(alpha)
-        rotated = pygame.transform.rotate(scaled, self.angle + SPRITE_ANGLE_OFFSET)
-        screen_center = camera.world_to_screen(world_center[0], world_center[1])
-        rect = rotated.get_rect(center=(round(screen_center[0]), round(screen_center[1])))
-        screen.blit(rotated, rect)
-
     def draw(self, screen, camera):
-        screen_rect = camera.world_rect_to_screen(self.rect)
-        scale_x = screen_rect.width / self.base_img.get_width()
-        scale_y = screen_rect.height / self.base_img.get_height()
+        self._draw_tower(screen, camera)
 
-        # 1. Baza lvl 1 (towerBaseLvl1.png)
-        scaled_base = pygame.transform.scale(self.base_img, screen_rect.size)
-        screen.blit(scaled_base, screen_rect)
 
-        # 2. Błysk wystrzału na końcu lufy (bulletFireDefaultSmall.png)
-        if self.muzzle_flash_timer > 0.0:
-            muzzle_pos = self.get_muzzle_pos()
-            self._blit_rotated_part(screen, camera, self.fire_img, muzzle_pos, scale_x, scale_y)
 
-        # 3. Obrócona głowica default (towerHeadDefault.png)
-        self._blit_rotated_part(screen, camera, self.head_img, self.rect.center, scale_x, scale_y)
-
-    def draw_preview(self, screen, camera):
-        screen_rect = camera.world_rect_to_screen(self.rect)
-        scale_x = screen_rect.width / self.base_img.get_width()
-        scale_y = screen_rect.height / self.base_img.get_height()
-
-        preview_base = pygame.transform.scale(self.base_img, screen_rect.size)
-        preview_base.set_alpha(150)
-        screen.blit(preview_base, screen_rect)
-
-        self._blit_rotated_part(screen, camera, self.head_img, self.rect.center, scale_x, scale_y, alpha=150)
 
 
 class LongTower(Tower):
@@ -182,43 +218,31 @@ class LongTower(Tower):
     def __init__(self, world_x, world_y):
         super().__init__(world_x, world_y, tower_id=self.ID)
 
-    def _blit_rotated_part(self, screen, camera, image, world_center, screen_scale_x, screen_scale_y, alpha=255):
-        size = (
-            max(1, round(image.get_width() * screen_scale_x)),
-            max(1, round(image.get_height() * screen_scale_y)),
+    def draw(self, screen, camera):
+        self._draw_tower(screen, camera)
+
+
+class AreaTower(Tower):
+    ID = 3
+
+    def __init__(self, world_x, world_y):
+        super().__init__(world_x, world_y, tower_id=self.ID)
+
+    def shoot(self, target, enemies, bullets):
+        rocket = RocketBullet(
+            pos=self.get_muzzle_pos(),
+            target=target,
+            damage=self.damage,
+            speed=self.bullet_speed,
+            splash_radius=self.splash_radius,
+            enemies=enemies,
+            image=self.bullet_img,
+            angle=self.angle,
         )
-        scaled = pygame.transform.scale(image, size)
-        if alpha < 255:
-            scaled.set_alpha(alpha)
-        rotated = pygame.transform.rotate(scaled, self.angle + SPRITE_ANGLE_OFFSET)
-        screen_center = camera.world_to_screen(world_center[0], world_center[1])
-        rect = rotated.get_rect(center=(round(screen_center[0]), round(screen_center[1])))
-        screen.blit(rotated, rect)
+        bullets.add(rocket)
+        self.muzzle_flash_timer = 0.08
 
     def draw(self, screen, camera):
-        screen_rect = camera.world_rect_to_screen(self.rect)
-        scale_x = screen_rect.width / self.base_img.get_width()
-        scale_y = screen_rect.height / self.base_img.get_height()
+        self._draw_tower(screen, camera)
 
-        # 1. Baza lvl 1 (towerBaseLvl1.png)
-        scaled_base = pygame.transform.scale(self.base_img, screen_rect.size)
-        screen.blit(scaled_base, screen_rect)
 
-        # 2. Błysk wystrzału na końcu lufy (bulletFireDefaultSmall.png)
-        if self.muzzle_flash_timer > 0.0:
-            muzzle_pos = self.get_muzzle_pos()
-            self._blit_rotated_part(screen, camera, self.fire_img, muzzle_pos, scale_x, scale_y)
-
-        # 3. Obrócona głowica default (towerHeadDefault.png)
-        self._blit_rotated_part(screen, camera, self.head_img, self.rect.center, scale_x, scale_y)
-
-    def draw_preview(self, screen, camera):
-        screen_rect = camera.world_rect_to_screen(self.rect)
-        scale_x = screen_rect.width / self.base_img.get_width()
-        scale_y = screen_rect.height / self.base_img.get_height()
-
-        preview_base = pygame.transform.scale(self.base_img, screen_rect.size)
-        preview_base.set_alpha(150)
-        screen.blit(preview_base, screen_rect)
-
-        self._blit_rotated_part(screen, camera, self.head_img, self.rect.center, scale_x, scale_y, alpha=150)

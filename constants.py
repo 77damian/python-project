@@ -25,6 +25,7 @@ RANGE_TOLERANCE = 0.5
 SPRITE_ANGLE_OFFSET = -90
 
 TILESET_PATH = "assets/TileSet_V2.png"
+CRYSTAL_IMAGE = "assets/crystal/Blue_crystal1.png"
 
 # Buildings (TEMPORARY)
 TOWER_BASE_IMAGES = {
@@ -63,12 +64,30 @@ TOWERS_DATA = {
         "damage": 10,
         "range": 180,
         "fire_rate": 1.2,
+        "splash_radius": 0,
         "bullet_speed": 350,
         "turn_speed": 240,
         "aim_tolerance": 12,
         "barrel_length": 14,
         "cost": 50,
     },
+
+    3: {
+            "name": "AreaTower",
+            "head": "area",
+            "head_img": TOWER_HEAD_IMAGES["area"],
+            "bullet_img": BULLET_IMAGES["rocket_big"],
+            "fire_img": BULLET_FIRE_IMAGES["default_big"],
+            "damage": 50,
+            "range": 300,
+            "fire_rate": 0.5,
+            "bullet_speed": 600,
+            "splash_radius": 64,
+            "turn_speed": 120,
+            "aim_tolerance": 12,
+            "barrel_length": 14,
+            "cost": 150,
+        },
 
     2: {
             "name": "LongTower",
@@ -79,6 +98,7 @@ TOWERS_DATA = {
             "damage": 50,
             "range": 300,
             "fire_rate": 0.5,
+            "splash_radius": 0,
             "bullet_speed": 600,
             "turn_speed": 120,
             "aim_tolerance": 12,

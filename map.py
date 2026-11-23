@@ -148,6 +148,23 @@ class Map:
             raise ValueError(f"{name}: map is empty")
         return board
 
+    def is_area_buildable(self, rect):
+        start_col = int(rect.left // TILE_SIZE)
+        end_col = int((rect.right - 1) // TILE_SIZE)
+        start_row = int(rect.top // TILE_SIZE)
+        end_row = int((rect.bottom - 1) // TILE_SIZE)
+
+        if start_col < 0 or start_row < 0 or end_col >= self.cols or end_row >= self.rows:
+            return False
+
+        for row in range(start_row, end_row + 1):
+            for col in range(start_col, end_col + 1):
+                tile = self.board[row][col]
+                if tile.terrain != "G" or tile.structure is not None:
+                    return False
+
+        return True
+
     def find_crystal(self):
         crystals = [tile for row in self.board for tile in row if tile.structure == CRYSTAL_TOKEN]
         if len(crystals) != 1:

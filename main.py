@@ -26,7 +26,7 @@ bullets = pygame.sprite.Group()
 spawn_timer = 0.0
 
 map_manager = Map(screen, camera)
-build_manager = BuildingManager(screen, camera)
+build_manager = BuildingManager(screen, camera, map_manager)
 ui_manager = UIManager(screen)
 crystal = Crystal(map_manager.crystal_tile.x, map_manager.crystal_tile.y)
 build_manager.add_building(crystal)

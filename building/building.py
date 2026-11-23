@@ -21,7 +21,8 @@ class Building(pygame.sprite.Sprite):
     def draw(self, screen, camera):
         pygame.draw.rect(screen, "red", camera.world_rect_to_screen(self.rect))
 
-    def draw_preview(self, screen, camera):
+    def draw_preview(self, screen, camera, can_place=True):
+        color = (0, 0, 255) if can_place else (255, 0, 0)
         pygame.draw.rect(screen, (0, 0, 255, 120), camera.world_rect_to_screen(self.rect))
 
     def change_location(self, x, y):
@@ -45,12 +46,19 @@ class Building(pygame.sprite.Sprite):
 
 
 class Crystal(Building):
+    _image = None
+
     def __init__(self, world_x, world_y):
         super().__init__(world_x, world_y)
         self.health = CRYSTAL_HEALTH
         self.building_size = 2
         self.x, self.y = self.world_x * TILE_SIZE, self.world_y * TILE_SIZE
         self.rect = pygame.Rect(self.x, self.y, TILE_SIZE * self.building_size, TILE_SIZE * self.building_size)
+        if Crystal._image is None:
+            Crystal._image = pygame.image.load(CRYSTAL_IMAGE).convert_alpha()
 
     def draw(self, screen, camera):
-        pygame.draw.rect(screen, "purple", camera.world_rect_to_screen(self.rect))
+        screen_rect = camera.world_rect_to_screen(self.rect)
+        scaled_img = pygame.transform.scale(Crystal._image, screen_rect.size)
+        screen.blit(scaled_img, screen_rect)
+        # pygame.draw.rect(screen, "purple", camera.world_rect_to_screen(self.rect))
