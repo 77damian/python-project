@@ -20,6 +20,7 @@ class Enemy(pygame.sprite.Sprite):
         self.cooldown_left = 0.0
         self.radius = 12
         self.health = 100
+        self.gold_reward = 10
 
         # placeholder graphics
         size = self.radius * 2
@@ -85,6 +86,7 @@ class Tank(Enemy):
     attack_range = 4
     attack_cooldown = 2.0
     spawn_weight = 1
+    gold_reward = 25
 
 
 class Archer(Enemy):
@@ -97,6 +99,7 @@ class Archer(Enemy):
     attack_cooldown = 1.5
     spawn_weight = 3
     bullet_speed = 300
+    gold_reward = 15
 
     def attack(self, bullets):
         bullets.add(Bullet(self.pos, self.target, self.damage, self.bullet_speed))

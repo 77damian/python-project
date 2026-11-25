@@ -41,6 +41,13 @@ class Map:
         self.crystal_tile = self.find_crystal()
         self.mouse_pos = None
 
+    def load_level(self, level_num):
+        path = f"assets/maps/level{level_num}.txt"
+        self.board = self.load_map(path)
+        self.rows = len(self.board)
+        self.cols = len(self.board[0])
+        self.crystal_tile = self.find_crystal()
+
     @classmethod
     def load_tileset(cls):
         if cls._base_tiles is None:

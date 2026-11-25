@@ -11,6 +11,11 @@ class BuildingManager:
         2: LongTower,
         3: AreaTower
     }
+    BUILDING_COSTS = {
+        1: 50,
+        2: 80,
+        3: 100,
+    }
 
     def __init__(self, screen, camera, map_manager):
         self.buildings = pygame.sprite.Group()
@@ -44,6 +49,10 @@ class BuildingManager:
             self.selected_building_id = building_id
             self.selected_building = building_cls(-1000, -1000)
 
+    def clear_selection(self):
+        self.selected_building = None
+        self.selected_building_id = None
+
     def add_building(self, building):
         self.buildings.add(building)
 
@@ -68,7 +77,7 @@ class BuildingManager:
             can_place = self.can_place_building(self.selected_building)
             self.selected_building.draw_preview(self.screen, self.camera, can_place)
 
-    def handle_keys(self, keys):
+    def handle_keys(self, keys, place_clicked=False, game_state=None):
         if keys[pygame.K_1]:
             self.select_building(1)
         if keys[pygame.K_2]:
@@ -76,12 +85,10 @@ class BuildingManager:
         if keys[pygame.K_3]:
             self.select_building(3)
 
-        mouse_pressed = pygame.mouse.get_pressed()[0]
-
-        if mouse_pressed and not self.mouse_clicked and self.selected_building and self.can_place_building(self.selected_building):
-            self.buildings.add(self.selected_building)
-            self.select_building(self.selected_building_id)
-
-
-
-        self.mouse_clicked = mouse_pressed
+        if place_clicked and self.selected_building and self.can_place_building(self.selected_building):
+            cost = self.BUILDING_COSTS.get(self.selected_building_id, 0)
+            if game_state is None or game_state["gold"] >= cost:
+                if game_state is not None:
+                    game_state["gold"] -= cost
+                self.buildings.add(self.selected_building)
+                self.select_building(self.selected_building_id)
