@@ -4,7 +4,7 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from ui import Frame, Button, Label
 
 
-def create_level_select(ui_manager) -> None:
+def create_level_select(ui_manager, game_state):
     """Build the level-select screen and register it with *ui_manager*.
 
     Displays a title, a horizontal row of five level buttons, and a back
@@ -50,12 +50,19 @@ def create_level_select(ui_manager) -> None:
     btn_press = (90, 90, 140)
     btn_text = (255, 255, 255)
 
-    for level_num in range(1, 6):
+    for level_num in range(1, 4):
+        def _make_level_click(n=level_num):
+            def handler():
+                game_state["selected_level"] = n
+                game_state["restart_requested"] = True
+                ui_manager.set_screen("game")
+            return handler
+
         level_btn = Button(
             text=f"Level {level_num}",
             width=100,
             height=80,
-            on_click=lambda _n=level_num: ui_manager.set_screen("game"),
+            on_click=_make_level_click(),
             bg_color=btn_bg,
             hover_color=btn_hover,
             press_color=btn_press,

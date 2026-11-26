@@ -4,3 +4,4 @@ from .ui_element import UIElement
 from .frame import Frame
 from .button import Button
 from .label import Label
+from .bar import Bar
