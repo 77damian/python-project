@@ -27,6 +27,7 @@ class Button(UIElement):
         font_size: int = 20,
         border_color: tuple[int, int, int] | None = None,
         border_width: int = 2,
+        icon: pygame.Surface | None = None,
     ) -> None:
         super().__init__(width=width, height=height)
         self.text: str | Callable[[], str] = text
@@ -38,6 +39,7 @@ class Button(UIElement):
         self.font_size: int = font_size
         self.border_color: tuple[int, int, int] | None = border_color
         self.border_width: int = border_width
+        self.icon: pygame.Surface | None = icon
         self.state: int = Button.NORMAL
         self._font: pygame.font.Font = pygame.font.Font(None, font_size)
 
@@ -81,12 +83,33 @@ class Button(UIElement):
         if self.border_color:
             pygame.draw.rect(screen, self.border_color, rect, self.border_width)
 
-        # Render text centered (supports multiline text with \n)
+        # Render text (bottom-aligned when icon is present, centered otherwise)
         display_text = self.text if isinstance(self.text, str) else self.text()
         lines = display_text.split("\n")
         line_height = self._font.get_linesize()
         total_h = len(lines) * line_height
-        start_y = rect.centery - total_h // 2
+
+        if self.icon is not None:
+            bottom_pad = 6
+            top_pad = 6
+            avail_w = max(1, rect.width - 16)
+            avail_h = max(1, rect.height - total_h - bottom_pad - top_pad - 4)
+            iw, ih = self.icon.get_size()
+            scale = min(avail_w / iw, avail_h / ih)
+            scaled_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
+            icon_surf = (
+                self.icon
+                if scaled_size == (iw, ih)
+                else pygame.transform.smoothscale(self.icon, scaled_size)
+            )
+            icon_rect = icon_surf.get_rect(
+                centerx=rect.centerx,
+                centery=rect.top + top_pad + avail_h // 2,
+            )
+            screen.blit(icon_surf, icon_rect)
+            start_y = rect.bottom - total_h - bottom_pad
+        else:
+            start_y = rect.centery - total_h // 2
 
         for i, line in enumerate(lines):
             line_surf = self._font.render(line, True, self.text_color)

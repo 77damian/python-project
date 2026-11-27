@@ -8,7 +8,7 @@ from typing import Dict, Any
 
 import pygame
 
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, TOWERS_DATA, TOWER_BASE_IMAGES
 from ui import Frame, Button, Label, Bar
 
 
@@ -141,7 +141,12 @@ def create_hud(ui_manager, game_state: Dict[str, Any]) -> Dict[str, Any]:
     def go_to_main_menu():
         game_state["paused"] = False
         game_state["restart_requested"] = True
+        game_state["selected_building"] = None
+        game_state["clear_building"] = True
         pause_menu.hide()
+        build_panel.hide()
+        tower_panel.hide()
+        wall_panel.hide()
         ui_manager.set_screen("main_menu")
 
     resume_btn = Button(
@@ -242,9 +247,9 @@ def create_hud(ui_manager, game_state: Dict[str, Any]) -> Dict[str, Any]:
     hud_root.add(build_panel, x=build_panel.x, y=build_panel.y)
 
     # =========================================================================
-    # Tower Selection Window — 5 buttons
+    # Tower Selection Window — square buttons with tower icon and caption
     # =========================================================================
-    t_btn_w, t_btn_h = 95, 55
+    t_btn_w, t_btn_h = 90, 90
     t_padding = 12
     t_gap = 10
     num_towers = 3
@@ -264,8 +269,19 @@ def create_hud(ui_manager, game_state: Dict[str, Any]) -> Dict[str, Any]:
         border_width=2,
     )
 
+    base_icon = pygame.image.load(TOWER_BASE_IMAGES[1]).convert_alpha()
+
     for i in range(1, num_towers + 1):
         tower_idx = i
+        tower_data = TOWERS_DATA[tower_idx]
+        head_icon = pygame.image.load(tower_data["head_img"]).convert_alpha()
+
+        # Composite base + head into a single preview surface
+        icon_w = max(base_icon.get_width(), head_icon.get_width())
+        icon_h = max(base_icon.get_height(), head_icon.get_height())
+        tower_icon = pygame.Surface((icon_w, icon_h), pygame.SRCALPHA)
+        tower_icon.blit(base_icon, base_icon.get_rect(center=(icon_w // 2, icon_h // 2)))
+        tower_icon.blit(head_icon, head_icon.get_rect(center=(icon_w // 2, icon_h // 2)))
 
         def _make_tower_click(idx=tower_idx):
             def handler():
@@ -274,7 +290,7 @@ def create_hud(ui_manager, game_state: Dict[str, Any]) -> Dict[str, Any]:
             return handler
 
         t_button = Button(
-            text=f"Tower {i}",
+            text=f"{tower_data['name']}\n{tower_data['cost']}",
             width=t_btn_w,
             height=t_btn_h,
             on_click=_make_tower_click(),
@@ -282,7 +298,8 @@ def create_hud(ui_manager, game_state: Dict[str, Any]) -> Dict[str, Any]:
             hover_color=btn_hover,
             press_color=btn_press,
             text_color=(255, 255, 255),
-            font_size=18,
+            font_size=15,
+            icon=tower_icon,
         )
         tower_panel.add(t_button)
 
